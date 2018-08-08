@@ -1,9 +1,10 @@
 var express = require("express");
 var bodyParser = require("body-parser");
 var request = require("request");
+var logica = require('./logica');
 /*var chistes = require("chistes.json")*/
 
-const APP_TOKEN = 'EAADtPW1uRIMBADPFS7chZAqbJ61nfZCowjIPAClzPWa6TiMZBUHifZCJG98DC7UR9QfPhk3mvE4B4AKS6QE31ZBBAzZBuOJHX3ZCQwzVma8BOO2TLKtDm7q14JT4SZBpYxmuhbaLVBuOZCmsbZBNKBMnXZBwBYvnTlmZBVepuXJaDRnsoQZDZD';
+const APP_TOKEN = 'EAADtPW1uRIMBAMvX8EoDSMOc1WQxiNfdUlg6uwblbYe9dDS8kZAEEqHFruQ9EmjusCZAPZBOwm0iwXIrdZCC5Ji5wVtAhiqxfoevkIVL0o4P00wAe7CrZCddeSKR3vxZBMB4SAG54mXp9zDgDgKOAg35uRzUlrsjHAMNCduGHD2AZDZD';
 
 var app = express();
 app.use(bodyParser.json());
@@ -65,38 +66,13 @@ function recibeMensaje(event){
 	var usuarioEnvia  = event.sender.id;
 	var usuarioRecibe = event.recipient.id;
 	var mensaje = event.message.text; 
-	evaluarMensaje(mensaje,usuarioEnvia);
+	var respuestaBot = logica.logica.evaluarMensaje(mensaje,usuarioEnvia);
+	procesaMensaje(respuestaBot,usuarioEnvia);
 }
 
-function evaluarMensaje(mensaje,usuario)
+function procesaMensaje(mensaje,usuario)
 {
-	var mensajeSalida = '';
-	if(contienePalabra(mensaje,'ayuda'))
-	{
-		mensajeSalida = "Por el momento no te puedo ayudar";
-		enviaMensaje(mensajeSalida, usuario);
-		//enviaMensaje(mensajeSalida,usuario);
-	}
-	else if(contienePalabra(mensaje,'dolar'))
-	{
-		mensajeSalida = "El precio del dolar es: $2.800 :)";
-		enviaMensaje(mensajeSalida,usuario);
-		//enviaMensaje(mensajeSalida,usuario);
-	}
-	else if(contienePalabra(mensaje,'chiste'))
-	{
-		getChiste(function(chiste){
-			mensajeSalida = chiste;
-			enviaMensaje(mensajeSalida,usuario);
-		});
-		//enviaMensaje(mensajeSalida,usuario);
-	}
-	else
-	{
-		mensajeSalida = "Solo se repetir "+mensaje;
-		enviaMensaje(mensajeSalida,usuario);
-	}
-	
+	enviaMensaje(mensaje, usuario);
 }
 //respuesta a Facebook Messenger
 function enviaMensaje(mensaje,usuario)
@@ -151,27 +127,4 @@ function callSendApi(messageData){
 			console.log('mensaje enviado');
 		}
 	})
-}
-
-function getChiste(callback)
-{
-	var salida = '';
-	request('http://api.icndb.com/jokes/random',function(error,response,data){
-		var info = JSON.parse(data);
-		//console.log(info)
-		//console.log(info.value.joke);
-		salida = info.value.joke+" :D";
-		callback(salida);
-	});
-}
-
-function contienePalabra(sentencia,palabra){
-	if(sentencia != undefined)
-	{
-		return sentencia.indexOf(palabra) > -1;
-	}
-	else
-	{
-		return -1;
-	}
 }
